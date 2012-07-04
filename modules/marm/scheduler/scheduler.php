@@ -78,19 +78,17 @@ final class Scheduler {
         $this->_blLocked = 1;
      
         $tasks = $this->_getTasks();
-        var_dump($tasks);
         foreach ($tasks as $task) {
             if($task['path']){
-                var_dump($task['path']);
-                //include $task['path'];
+                include $task['path'];
             }
-            //$class = oxNew($task['class']);
-            //$ret = $class->run();
-            $ret= array();
+            $class = oxNew($task['class']);
+            $ret = $class->run();
+            /*$ret= array();
             $ret['success']= 1;
             $ret['message']='debug';
             $ret['time']=time();
-            $ret['runtime']=10;
+            $ret['runtime']=10;*/
             $this->_logTask($task['id'], $task['class'], $ret);
         }
         
@@ -120,13 +118,15 @@ final class Scheduler {
     }
     
     private function _logTask($id, $class, $array){
+        var_dump('Test:logging');
         $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,success,message,time,runtime) VALUES ('.$id
-                    .','.$class
-                    .','.$array['success']
-                    .','.$array['message']
-                    .','.$array['time']
+                    .',\''.$class
+                    .'\','.$array['success']
+                    .',\''.$array['message']
+                    .'\','.$array['time']
                     .','.$array['runtime']
                     .')';
+            var_dump($sQuery);
         $this->_oDb->Execute($sQuery);
     }
 
@@ -134,3 +134,4 @@ final class Scheduler {
 $scheduler = Scheduler::getInstance();
 $scheduler->run();
 ?>
+
