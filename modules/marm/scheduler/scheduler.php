@@ -80,15 +80,10 @@ final class Scheduler {
         $tasks = $this->_getTasks();
         foreach ($tasks as $task) {
             if($task['path']){
-                include $task['path'];
+                include getShopBasePath() . $task['path'];
             }
             $class = oxNew($task['class']);
             $ret = $class->run();
-            /*$ret= array();
-            $ret['success']= 1;
-            $ret['message']='debug';
-            $ret['time']=time();
-            $ret['runtime']=10;*/
             $this->_logTask($task['id'], $task['class'], $ret);
         }
         
@@ -99,7 +94,7 @@ final class Scheduler {
     
     private function _getTasks(){
         $now = time();
-        $sQuery = 'SELECT * FROM marmSchedulerTasks WHERE active =\'1\' AND (lastrun + timeinterval) <= \''.$now.'\'';
+        $sQuery = 'SELECT * FROM marmSchedulerTasks WHERE active = 1 AND (lastrun + timeinterval) <= \''.$now.'\'';
         //$sQuery = 'SELECT * FROM marmSchedulerTasks';
         $this->_oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
         $oRes = $this->_oDb->Execute($sQuery);
@@ -118,7 +113,6 @@ final class Scheduler {
     }
     
     private function _logTask($id, $class, $array){
-        var_dump('Test:logging');
         $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,success,message,time,runtime) VALUES ('.$id
                     .',\''.$class
                     .'\','.$array['success']
@@ -126,7 +120,8 @@ final class Scheduler {
                     .'\','.$array['time']
                     .','.$array['runtime']
                     .')';
-            var_dump($sQuery);
+        $this->_oDb->Execute($sQuery);
+        $sQuery = 'UPDATE marmSchedulerTasks SET lastrun ='.$array['time'].' WHERE id ='.$id;
         $this->_oDb->Execute($sQuery);
     }
 

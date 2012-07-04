@@ -50,7 +50,6 @@ class marm_scheduler extends oxAdminView
                                                 .',starttime='.$task['starttime']
                                                 .',timeinterval='.$task['timeinterval']
                                                 .' WHERE id='.$key;
-            var_dump($sQuery);
             $oDb->Execute($sQuery);
         }
         if (!empty($aParams['new']['class'])){
@@ -67,3 +66,4 @@ class marm_scheduler extends oxAdminView
 
     }
 }
+
