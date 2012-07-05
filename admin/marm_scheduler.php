@@ -10,22 +10,28 @@ class marm_scheduler extends oxAdminView
      */
     protected $_sThisTemplate = 'marmScheduler.tpl';
         
+    const CONFIG_ENTRY_NAME = 'marm_scheduler_config';
+    
     public function getTasks(){
+        
         $now = time();
         $sQuery = 'SELECT * FROM marmSchedulerTasks';
-        $this->_oDb = oxDb::getDb(oxdb::FETCH_MODE_ASSOC);
+
+        $this->_oDb = oxDb::getDb();
         $oRes = $this->_oDb->Execute($sQuery);
         $tasks = array();
+
         if ($oRes != false && $oRes->recordCount() > 0){
             while (!$oRes->EOF){
                 $task = array();
-                $task['id'] = $oRes->fields["id"];
-                $task['class'] = $oRes->fields["class"];
-                $task['path'] = $oRes->fields["path"];
-                $task['description'] = $oRes->fields["description"];
-                $task['active'] = $oRes->fields["active"];
-                $task['starttime'] = $oRes->fields["starttime"];
-                $task['timeinterval'] = $oRes->fields["timeinterval"];
+                $task['id'] = $oRes->fields[0];
+                $task['active'] = $oRes->fields[1];
+                $task['path'] = $oRes->fields[2];
+                $task['class'] = $oRes->fields[3];
+                $task['description'] = $oRes->fields[4];
+                $task['starttime'] = $oRes->fields[5];
+                $task['timeinterval'] = $oRes->fields[6];
+                $task['lastrun'] = $oRes->fields[7];
                 $tasks[] = $task;
                 $oRes->moveNext();
             }
@@ -46,24 +52,41 @@ class marm_scheduler extends oxAdminView
             $sQuery = 'UPDATE marmSchedulerTasks SET class =\''.$task['class']
                                                 .'\',path=\''.$task['path']
                                                 .'\',description=\''.$task['description']
-                                                .'\',active='.$task['active']
-                                                .',starttime='.$task['starttime']
-                                                .',timeinterval='.$task['timeinterval']
-                                                .' WHERE id='.$key;
+                                                .'\',active=\''.$task['active']
+                                                .'\',starttime=\''.$task['starttime']
+                                                .'\',timeinterval=\''.$task['timeinterval']
+                                                .'\' WHERE id='.$key;
             $oDb->Execute($sQuery);
         }
         if (!empty($aParams['new']['class'])){
             $task=$aParams['new'];
+            
             $sQuery = 'INSERT INTO marmSchedulerTasks (class, path, description, active, starttime, timeinterval) VALUES (\''.$task['class']
                                                 .'\',\''.$task['path']
                                                 .'\',\''.$task['description']
-                                                .','.$task['active']
-                                                .','.$task['starttime']
-                                                .','.$task['timeinterval']
+                                                .'\',\''.$task['active']
+                                                .'\',\''.$task['starttime']
+                                                 .'\',\''.$task['timeinterval']
                                                 .'\')';
-                                        $oDb->Execute($sQuery);
+            $oDb->Execute($sQuery);
         }
 
     }
+    
+    public function isSchedulerRunning(){
+        $config = oxConfig::getInstance()->getShopConfVar(self::CONFIG_ENTRY_NAME);
+        return !$config['locked'];
+    }
+    
+    public function unlockScheduler(){
+        $config = oxConfig::getInstance()->getShopConfVar(self::CONFIG_ENTRY_NAME);
+        if($config['locked']==0){
+            return true;
+        }
+        $config['locked'] = 0;
+        oxConfig::getInstance()->saveShopConfVar('aarr',self::CONFIG_ENTRY_NAME,  $config);
+        return true;
+    }
 }
+
 

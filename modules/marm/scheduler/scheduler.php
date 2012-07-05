@@ -70,25 +70,44 @@ final class Scheduler {
     public function run(){
         
         //check if scheduler is still running
-        if ($this->_blLocked){
+        $config = oxConfig::getInstance()->getShopConfVar(self::CONFIG_ENTRY_NAME);
+        if ($config['locked']){
+            echo 'scheduler locked';
             return false;
         }
         
         //lock scheduler
-        $this->_blLocked = 1;
-     
+        $config['locked'] = 1;
+        oxConfig::getInstance()->saveShopConfVar('aarr',self::CONFIG_ENTRY_NAME,  $config);
+        
         $tasks = $this->_getTasks();
         foreach ($tasks as $task) {
-            if($task['path']){
-                include getShopBasePath() . $task['path'];
+            try {
+                if($task['path']){
+                    if(file_exists(getShopBasePath() . $task['path'])){
+                        include getShopBasePath() . $task['path'];
+                    }
+                }
+                $class = oxNew($task['class']);
+                if (method_exists($class, 'run')){
+                    $ret = $class->run();
+                    $this->_logTask($task['id'], $task['class'], $ret);
+                } else {
+                    $message = 'function run does not exist';
+                    $this->_logError($task['id'], $task['class'], $message);
+                    $this->_deactivateTask($task['id']);
+                }
+            }catch(Exception $e){
+                $message= 'exception: '.$e->getMessage();
+                $this->_logError($task['id'], $task['class'], $message);
+                $this->_deactivateTask($task['id']);
             }
-            $class = oxNew($task['class']);
-            $ret = $class->run();
-            $this->_logTask($task['id'], $task['class'], $ret);
+
         }
         
         //unlock scheduler
-        $this->_blLocked = 0;
+        $config['locked'] = 0;
+        oxConfig::getInstance()->saveShopConfVar('aarr',self::CONFIG_ENTRY_NAME,  $config);
 
     }
     
@@ -96,15 +115,15 @@ final class Scheduler {
         $now = time();
         $sQuery = 'SELECT * FROM marmSchedulerTasks WHERE active = 1 AND (lastrun + timeinterval) <= \''.$now.'\'';
         //$sQuery = 'SELECT * FROM marmSchedulerTasks';
-        $this->_oDb = oxDb::getDb(oxDb::FETCH_MODE_ASSOC);
+        $this->_oDb = oxDb::getDb();
         $oRes = $this->_oDb->Execute($sQuery);
         $tasks = array();
         if ($oRes != false && $oRes->recordCount() > 0){
             while (!$oRes->EOF){
                 $task = array();
-                $task['id'] = $oRes->fields["id"];
-                $task['class'] = $oRes->fields["class"];
-                $task['path'] = $oRes->fields["path"];
+                $task['id'] = $oRes->fields[0];
+                $task['class'] = $oRes->fields[3];
+                $task['path'] = $oRes->fields[2];
                 $tasks[] = $task;
                 $oRes->moveNext();
             }
@@ -113,6 +132,7 @@ final class Scheduler {
     }
     
     private function _logTask($id, $class, $array){
+        $now =time();
         $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,success,message,time,runtime) VALUES ('.$id
                     .',\''.$class
                     .'\','.$array['success']
@@ -121,7 +141,22 @@ final class Scheduler {
                     .','.$array['runtime']
                     .')';
         $this->_oDb->Execute($sQuery);
-        $sQuery = 'UPDATE marmSchedulerTasks SET lastrun ='.$array['time'].' WHERE id ='.$id;
+        $sQuery = 'UPDATE marmSchedulerTasks SET lastrun ='.$now.' WHERE id ='.$id;
+        $this->_oDb->Execute($sQuery);
+    }
+    
+    private function _logError($id, $class, $message){
+        $now =time();
+        $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,success,message,time,runtime) VALUES ('.$id
+                    .',\''.$class
+                    .'\',0,\''.$message
+                    .'\','.$now
+                    .',0)';
+        $this->_oDb->Execute($sQuery);
+    }
+    
+    private function _deactivateTask($id){
+        $sQuery = 'UPDATE marmSchedulerTasks SET active = 0 WHERE id ='.$id;
         $this->_oDb->Execute($sQuery);
     }
 
@@ -129,4 +164,5 @@ final class Scheduler {
 $scheduler = Scheduler::getInstance();
 $scheduler->run();
 ?>
+
 
