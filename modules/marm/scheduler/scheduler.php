@@ -154,7 +154,7 @@ final class Scheduler {
                         .'\',\''.$array['runtime']
                         .'\')';
         }
-        var_dump($sQuery);
+        //var_dump($sQuery);
         $this->_oDb->Execute($sQuery);
         if(!$blStart){
             $sQuery = 'UPDATE marmSchedulerTasks SET lastrun ='.$now.' WHERE id ='.$id;
