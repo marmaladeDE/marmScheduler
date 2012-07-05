@@ -81,6 +81,7 @@ final class Scheduler {
         oxConfig::getInstance()->saveShopConfVar('aarr',self::CONFIG_ENTRY_NAME,  $config);
         
         $tasks = $this->_getTasks();
+        //var_dump($tasks);
         foreach ($tasks as $task) {
             try {
                 if($task['path']){
@@ -90,16 +91,19 @@ final class Scheduler {
                 }
                 $class = oxNew($task['class']);
                 if (method_exists($class, 'run')){
+                    $this->_logTask($task, null, true);
+                    $start = time();
                     $ret = $class->run();
-                    $this->_logTask($task['id'], $task['class'], $ret);
+                    $ret['runtime'] = time()-$start;
+                    $this->_logTask($task, $ret);
                 } else {
                     $message = 'function run does not exist';
-                    $this->_logError($task['id'], $task['class'], $message);
+                    $this->_logError($task, $message);
                     $this->_deactivateTask($task['id']);
                 }
             }catch(Exception $e){
-                $message= 'exception: '.$e->getMessage();
-                $this->_logError($task['id'], $task['class'], $message);
+                $message= $e->getMessage();
+                $this->_logError($task, $message);
                 $this->_deactivateTask($task['id']);
             }
 
@@ -114,7 +118,6 @@ final class Scheduler {
     private function _getTasks(){
         $now = time();
         $sQuery = 'SELECT * FROM marmSchedulerTasks WHERE active = 1 AND (lastrun + timeinterval) <= \''.$now.'\'';
-        //$sQuery = 'SELECT * FROM marmSchedulerTasks';
         $this->_oDb = oxDb::getDb();
         $oRes = $this->_oDb->Execute($sQuery);
         $tasks = array();
@@ -131,27 +134,42 @@ final class Scheduler {
         return $tasks;
     }
     
-    private function _logTask($id, $class, $array){
+    private function _logTask($task, $array= null, $blStart = false){
         $now =time();
-        $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,success,message,time,runtime) VALUES ('.$id
-                    .',\''.$class
-                    .'\','.$array['success']
-                    .',\''.$array['message']
-                    .'\','.$array['time']
-                    .','.$array['runtime']
-                    .')';
+        if($blStart){
+            $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,status,message,time)'
+                        .' VALUES (\''.$task['id']
+                                .'\',\''.$task['class']
+                                .'\',\'2'
+                                .'\',\'starting'
+                                .'\',\''.$now
+                                .'\')';
+        } else {
+            $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,status,message,time,runtime)'
+                    .' VALUES (\''.$task['id']
+                        .'\',\''.$task['class']
+                        .'\',\''.$array['success']
+                        .'\',\''.$array['message']
+                        .'\',\''.$now
+                        .'\',\''.$array['runtime']
+                        .'\')';
+        }
+        var_dump($sQuery);
         $this->_oDb->Execute($sQuery);
-        $sQuery = 'UPDATE marmSchedulerTasks SET lastrun ='.$now.' WHERE id ='.$id;
-        $this->_oDb->Execute($sQuery);
+        if(!$blStart){
+            $sQuery = 'UPDATE marmSchedulerTasks SET lastrun ='.$now.' WHERE id ='.$id;
+            $this->_oDb->Execute($sQuery);
+        }
     }
     
-    private function _logError($id, $class, $message){
+    private function _logError($task, $message){
         $now =time();
-        $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,success,message,time,runtime) VALUES ('.$id
-                    .',\''.$class
-                    .'\',0,\''.$message
-                    .'\','.$now
-                    .',0)';
+        $sQuery = 'INSERT INTO marmSchedulerLog (taskid,class,status,message,time)'
+                    .' VALUES (\''.$task['id']
+                            .'\',\''.$task['class']
+                            .'\',\'0\',\''.$message
+                            .'\',\''.$now
+                            .'\')';
         $this->_oDb->Execute($sQuery);
     }
     
