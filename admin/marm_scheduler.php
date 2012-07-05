@@ -83,9 +83,22 @@ class marm_scheduler extends oxAdminView
         if($config['locked']==0){
             return true;
         }
+        $id = $this->_getLastStartedTask();
+        $this->_deactivateTask($id);
         $config['locked'] = 0;
         oxConfig::getInstance()->saveShopConfVar('aarr',self::CONFIG_ENTRY_NAME,  $config);
         return true;
+    }
+    
+    private function _getLastStartedTask(){
+        $oDb = oxDb::getDb();
+        $sQuery = 'SELECT id FROM marmSchedulerLog WHERE status=\'2\' ORDER BY id DESC';
+        $id = $oDb->getOne($sQuery);
+        return $id;
+    }
+    private function _deactivateTask($id){
+        $sQuery = 'UPDATE marmSchedulerTasks SET active = 0 WHERE id ='.$id;
+        $this->_oDb->Execute($sQuery);
     }
 }
 

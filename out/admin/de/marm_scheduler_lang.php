@@ -24,6 +24,7 @@ $aLang = array(
     'MARM_SCHEDULER_PATH' => 'Pfad zum Script',
     'MARM_SCHEDULER_STARTTIME' => 'Uhrzeit zu der Script aufgerufen wird (derzeit ignoriert)',
     'MARM_SCHEDULER_TIMEINTERVAL' => 'Intervall zwischen Aufrufen',
+    'MARM_SCHEDULER_UNLOCK' => 'Scheduler freischalten',
 );
 
 /*

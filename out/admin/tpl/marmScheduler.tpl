@@ -160,7 +160,10 @@ function _groupExp(el) {
 		   value="[{ oxmultilang ident="GENERAL_SAVE" }]"
 		   onclick="Javascript:document.myedit.fnc.value='save'"" [{ $readonly }]>
 	<br>
-
+    <input type="submit" class="edittext" id="oUnLockButton"
+		   value="[{ oxmultilang ident="MARM_SCHEDULER_UNLOCK" }]"
+		   onclick="Javascript:document.myedit.fnc.value='unlockScheduler'"" [{ $readonly }]>
+	<br>
 </form>
 [{include file="bottomnaviitem.tpl"}]
 [{include file="bottomitem.tpl"}]
