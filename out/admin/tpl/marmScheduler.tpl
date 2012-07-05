@@ -90,6 +90,25 @@ function _groupExp(el) {
                                 <input type="text" name="editval[[{$task.id}]][timeinterval]" value="[{$task.timeinterval}]"> <br />
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                [{ oxmultilang ident="MARM_SCHEDULER_LASTLOG" }]
+                            </td>
+                            <td>
+                                [{assign var=log value=$task.log}]
+                                [{if $log.status == 0 }][{ oxmultilang ident="MARM_SCHEDULER_LOG_ERROR" }]
+                                [{elseif $log.status == 1}][{ oxmultilang ident="MARM_SCHEDULER_LOG_SUCCESS" }]
+                                [{elseif $log.status == 2}][{ oxmultilang ident="MARM_SCHEDULER_LOG_STARTED" }]
+                                [{/if }]
+                                <br />
+                                [{ oxmultilang ident="MARM_SCHEDULER_LOG_MESSAGE" }]:&nbsp;
+                                [{$log.message}]<br />
+                                [{ oxmultilang ident="MARM_SCHEDULER_LOG_TIME" }]:&nbsp;
+                                [{$log.time}]&nbsp;
+                                [{ oxmultilang ident="MARM_SCHEDULER_LOG_RUNTIME" }]:&nbsp;
+                                [{$log.runtime}]
+                            </td>
+                        </tr>
                     </table>
                 </dd>
             </dl>
@@ -160,10 +179,12 @@ function _groupExp(el) {
 		   value="[{ oxmultilang ident="GENERAL_SAVE" }]"
 		   onclick="Javascript:document.myedit.fnc.value='save'"" [{ $readonly }]>
 	<br>
-    <input type="submit" class="edittext" id="oUnLockButton"
+        <input type="submit" class="edittext" id="oUnLockButton"
 		   value="[{ oxmultilang ident="MARM_SCHEDULER_UNLOCK" }]"
 		   onclick="Javascript:document.myedit.fnc.value='unlockScheduler'"" [{ $readonly }]>
 	<br>
+
 </form>
 [{include file="bottomnaviitem.tpl"}]
 [{include file="bottomitem.tpl"}]
+

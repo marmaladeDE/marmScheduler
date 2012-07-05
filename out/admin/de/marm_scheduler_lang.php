@@ -25,8 +25,16 @@ $aLang = array(
     'MARM_SCHEDULER_STARTTIME' => 'Uhrzeit zu der Script aufgerufen wird (derzeit ignoriert)',
     'MARM_SCHEDULER_TIMEINTERVAL' => 'Intervall zwischen Aufrufen',
     'MARM_SCHEDULER_UNLOCK' => 'Scheduler freischalten',
+    'MARM_SCHEDULER_LASTLOG' => 'Letzer Log-Eintrag',
+    'MARM_SCHEDULER_LOG_ERROR' => 'Fehler',
+    'MARM_SCHEDULER_LOG_SUCCESS' => 'Erfolgreich',
+    'MARM_SCHEDULER_LOG_STARTED' => 'Gestartet',
+    'MARM_SCHEDULER_LOG_MESSAGE' => 'Meldung',
+    'MARM_SCHEDULER_LOG_TIME' => 'Zeit',
+    'MARM_SCHEDULER_LOG_RUNTIME' => 'Laufzeit (s)',
 );
 
 /*
 [{ oxmultilang ident="GENERAL_YOUWANTTODELETE" }]
 */
+

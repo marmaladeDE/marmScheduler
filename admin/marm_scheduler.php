@@ -13,12 +13,11 @@ class marm_scheduler extends oxAdminView
     const CONFIG_ENTRY_NAME = 'marm_scheduler_config';
     
     public function getTasks(){
-        
         $now = time();
         $sQuery = 'SELECT * FROM marmSchedulerTasks';
 
-        $this->_oDb = oxDb::getDb();
-        $oRes = $this->_oDb->Execute($sQuery);
+        $oDb = oxDb::getDb();
+        $oRes = $oDb->Execute($sQuery);
         $tasks = array();
 
         if ($oRes != false && $oRes->recordCount() > 0){
@@ -32,6 +31,7 @@ class marm_scheduler extends oxAdminView
                 $task['starttime'] = $oRes->fields[5];
                 $task['timeinterval'] = $oRes->fields[6];
                 $task['lastrun'] = $oRes->fields[7];
+                $task['log'] = $this->_getLastLog($task['id']);
                 $tasks[] = $task;
                 $oRes->moveNext();
             }
@@ -92,14 +92,34 @@ class marm_scheduler extends oxAdminView
     
     private function _getLastStartedTask(){
         $oDb = oxDb::getDb();
-        $sQuery = 'SELECT id FROM marmSchedulerLog WHERE status=\'2\' ORDER BY id DESC';
+        $sQuery = 'SELECT taskid FROM marmSchedulerLog WHERE status=\'2\' ORDER BY id DESC';
         $id = $oDb->getOne($sQuery);
         return $id;
     }
     private function _deactivateTask($id){
+        $oDb = oxDb::getDb();
         $sQuery = 'UPDATE marmSchedulerTasks SET active = 0 WHERE id ='.$id;
-        $this->_oDb->Execute($sQuery);
+        $oDb->Execute($sQuery);
+    }
+    
+    private function _getLastLog($id){
+        $oDb = oxDb::getDb();
+        $sQuery = 'SELECT * FROM marmSchedulerLog WHERE taskid ='.$id.' ORDER BY id DESC LIMIT 1';
+        $oRes = $oDb->Execute($sQuery);
+        if ($oRes != false && $oRes->recordCount() > 0){
+            while (!$oRes->EOF){
+                $log = array();
+                $log['status'] = $oRes->fields[3];
+                $log['message'] = $oRes->fields[4];
+                $log['time'] = date('Y-m-d H:i:s',$oRes->fields[5]);
+                $log['runtime'] = $oRes->fields[6];
+                break;
+            }
+            return $log;
+        }
+        return null;
     }
 }
+
 
 
