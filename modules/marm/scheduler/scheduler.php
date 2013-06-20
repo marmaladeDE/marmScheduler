@@ -1,51 +1,21 @@
 <?php
 
-if (!function_exists('getShopBasePath')) {
-    /**
-     * Returns shop base path.
-     *
-     * @return string
-     */
-    function getShopBasePath()
-    {
-        return dirname(__FILE__).'/../../../';
-    }
-}
-
-// START INCLUDE OXID FRAMEWORK BLOCK - DELETE IF NOT NEEDED
-
-set_include_path(get_include_path() . PATH_SEPARATOR . getShopBasePath());
+/**
+ * Bootstrapping
+ * Start the framework
+ */
+require_once '../../../bootstrap.php';
 
 /**
- * Returns true.
- *
- * @return bool
+ * Start the scheduler
  */
-if ( !function_exists( 'isAdmin' )) {
-    /**
-     * @return bool
-     */
-    function isAdmin()
-    {
-        return false;
-    }
-}
-
-error_reporting( E_ALL ^ E_NOTICE );
-
-// custom functions file
-include getShopBasePath() . 'modules/functions.php';
-// Generic utility method file
-require_once getShopBasePath() . 'core/oxfunctions.php';
-// Including main ADODB include
-require_once getShopBasePath() . 'core/adodblite/adodb.inc.php';
-
-// END INCLUDE OXID FRAMEWORK BLOCK - DELETE IF NOT NEEDED
+$scheduler = Scheduler::getInstance();
+$scheduler->run();
 
 /**
  * Description of scheduler
  *
- * @author jens
+ * @author Jens Richter
  */
 final class Scheduler {
     
@@ -179,8 +149,6 @@ final class Scheduler {
     }
 
 }
-$scheduler = Scheduler::getInstance();
-$scheduler->run();
-?>
+
 
 
