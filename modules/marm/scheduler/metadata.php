@@ -17,10 +17,12 @@ $aModule = array(
     'url'           => 'http://www.marmalade.de',
     'email'         => 'support@marmalade.de',
     'extend'        => array(
+        'oxmaintenance'     => 'marm/scheduler/extends/marm_oxmaintenance'
     ),
     'files'         => array(
         'marm_scheduler'    => 'marm/scheduler/controllers/admin/marm_scheduler.php',
-        'job_interface'     => 'marm/scheduler/interfaces/job_interface.php'
+        'job_interface'     => 'marm/scheduler/interfaces/job_interface.php',
+        'scheduler'         => 'marm/scheduler/core/scheduler.php'
     ),
     'templates'     => array(
         'marmScheduler.tpl' => 'marm/scheduler/views/admin/marmScheduler.tpl'
