@@ -9,9 +9,13 @@
 
 class marm_oxmaintenance extends marm_oxmaintenance_parent {
 
+    /**
+     * @return mixed
+     */
     public function execute()
     {
-
+        $scheduler = scheduler::getInstance();
+        $scheduler->run();
         return parent::execute();
     }
 } 
