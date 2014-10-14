@@ -3,11 +3,13 @@
 /**
  * Class to demonstrate the scheduler
  */
-class send_email {
+class send_email implements job_interface {
     
     /**
      * You'll always need a public function run,
      * as this is the method we will call.
+     * 
+     * @return array
      */
     public function run()
     {

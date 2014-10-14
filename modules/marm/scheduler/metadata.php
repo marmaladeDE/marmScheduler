@@ -20,6 +20,7 @@ $aModule = array(
     ),
     'files'         => array(
         'marm_scheduler'    => 'marm/scheduler/controllers/admin/marm_scheduler.php',
+        'job_interface'     => 'marm/scheduler/interfaces/job_interface.php'
     ),
     'templates'     => array(
         'marmScheduler.tpl' => 'marm/scheduler/views/admin/marmScheduler.tpl'
