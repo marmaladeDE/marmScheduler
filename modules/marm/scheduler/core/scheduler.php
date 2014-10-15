@@ -1,23 +1,11 @@
 <?php
 
 /**
- * Bootstrapping
- * Start the framework
- */
-require_once '../../../bootstrap.php';
-
-/**
- * Start the scheduler
- */
-$scheduler = Scheduler::getInstance();
-$scheduler->run();
-
-/**
  * Description of scheduler
  *
  * @author Jens Richter
  */
-final class Scheduler {
+class scheduler {
     
     const CONFIG_ENTRY_NAME = 'marm_scheduler_config';
     
